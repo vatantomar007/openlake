@@ -1,166 +1,119 @@
-\# AGENTS.md
+# AGENTS.md
 
+## Project Overview
 
+OpenLake is a high-performance distributed object storage system designed for AI and GPU workloads.
 
-\## Purpose
+The project is written in Rust and focuses on low-latency, high-throughput data movement using technologies such as:
 
+* io_uring
+* RDMA
+* GPUDirect Storage
+* Erasure Coding
 
+Contributors should understand the surrounding architecture before making large changes.
 
-This document provides guidance for AI agents and contributors working on the OpenLake codebase.
+---
 
+## Repository Structure
 
+* `crates/` - Core Rust crates and services
+* `cli/` - CLI-related functionality
+* `benchmarks/` - Performance benchmarking tools
+* `docs/` - Documentation and architecture references
+* `assets/` - Images and static assets
+* `.github/` - CI workflows and repository automation
 
-\## Project Overview
+---
 
+## Build Commands
 
-
-OpenLake is a high-performance distributed object storage system designed for AI and GPU workloads. The project is written in Rust and focuses on minimizing storage-to-GPU latency through technologies such as `io\_uring`, RDMA, GPUDirect Storage, and efficient erasure coding.
-
-
-
-Agents should prioritize correctness, performance awareness, and consistency with existing architectural patterns.
-
-
-
-\---
-
-
-
-\## Repository Structure
-
-
-
-\* `crates/` – Core Rust crates that implement storage, networking, runtime, and server functionality.
-
-\* `cli/` – CLI-related components and commands.
-
-\* `benchmarks/` – Performance benchmarking and diagnostics.
-
-\* `docs/` – Documentation, architecture notes, and supporting material.
-
-\* `assets/` – Images and project assets used in documentation.
-
-\* `.github/` – GitHub workflows and repository configuration.
-
-
-
-\---
-
-
-
-\## Development Guidelines
-
-
-
-\### Follow Existing Patterns
-
-
-
-\* Match the style and conventions used in nearby code.
-
-\* Reuse existing abstractions before introducing new ones.
-
-\* Keep implementations consistent with the project's performance-oriented design.
-
-
-
-\### Keep Changes Focused
-
-
-
-\* Prefer small, targeted pull requests.
-
-\* Avoid unrelated refactoring.
-
-\* Modify only the components necessary for the task.
-
-
-
-\### Documentation
-
-
-
-When behavior changes:
-
-
-
-\* Update relevant documentation.
-
-\* Add usage examples when appropriate.
-
-\* Keep README and documentation aligned with implementation.
-
-
-
-\---
-
-
-
-\## Rust Workflow
-
-
-
-Before submitting changes, run:
-
-
+Build the entire workspace:
 
 ```bash
-
-cargo fmt
-
-cargo check
-
-cargo test
-
+cargo build --workspace
 ```
 
+Build optimized release binaries:
 
+```bash
+cargo build --release --workspace
+```
 
-For performance-sensitive changes, consider whether benchmark updates or validation are needed.
+---
 
+## Testing
 
+Run tests before submitting changes:
 
-\---
+```bash
+cargo test
+```
 
+Validate compilation:
 
+```bash
+cargo check
+```
 
-\## Pull Requests
+Format code:
 
+```bash
+cargo fmt
+```
 
+Run linting if available:
 
-Pull requests should:
+```bash
+cargo clippy --all-targets --all-features
+```
 
+---
 
+## Code Style Guidelines
 
-\* Reference an associated issue when available.
+* Follow existing Rust conventions.
+* Keep changes small and focused.
+* Reuse existing abstractions where possible.
+* Avoid introducing duplicate functionality.
+* Prefer readability and maintainability.
 
-\* Clearly describe the purpose of the change.
+---
 
-\* Remain focused on a single feature or fix.
+## Documentation
 
-\* Include documentation updates when applicable.
+When changing behavior:
 
+* Update relevant documentation.
+* Add examples where appropriate.
+* Keep documentation aligned with implementation.
 
+---
 
-\---
+## Pull Requests
 
+Before opening a PR:
 
+1. Run formatting and tests.
+2. Verify the workspace builds successfully.
+3. Keep the PR focused on a single feature or fix.
+4. Reference related issues when applicable.
 
-\## Guidance for AI Agents
+Suggested commit format:
 
+```text
+docs: update AGENTS.md guidance
+fix: resolve storage issue
+feat: add new CLI command
+```
 
+---
 
-1\. Read `README.md` and `CONTRIBUTING.md` before making changes.
+## Guidance for AI Agents
 
-2\. Understand the relevant crate and module structure before editing code.
-
-3\. Preserve existing behavior unless the task explicitly requires changes.
-
-4\. Prefer incremental improvements over broad redesigns.
-
-5\. Be mindful of performance implications, especially in storage, networking, and runtime-related code.
-
-6\. Keep generated code idiomatic Rust and compatible with the existing workspace structure.
-
-
-
+1. Read `README.md` and `CONTRIBUTING.md` before making changes.
+2. Inspect the relevant crate before editing code.
+3. Preserve existing behavior unless explicitly instructed otherwise.
+4. Avoid large-scale refactors in unrelated code.
+5. Consider performance implications for storage, networking, and runtime paths.
+6. Update documentation alongside code changes.
