@@ -1,22 +1,53 @@
-OpenLake Documentation
-======================
+OpenLake Documentation Structure
+================================
 
-Welcome to the OpenLake documentation.
+This document proposes the initial documentation hierarchy for OpenLake.
 
-OpenLake is a distributed object storage system designed for AI workloads,
-providing high-throughput and low-latency access to data for training and
-inference clusters.
+Documentation Goals
+-------------------
 
-Contents
---------
+The documentation should help users:
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Documentation
+* Understand OpenLake architecture and core concepts.
+* Install and configure OpenLake.
+* Deploy and manage clusters.
+* Use OpenLake CLI commands.
+* Contribute to the project.
 
-   getting_started
-   installation
-   architecture
-   cluster_management
-   cli_commands
-   contributing
+Proposed Documentation Layout
+-----------------------------
+
+OpenLake Docs
+
+* Getting Started
+    * Introduction
+    * Installation
+    * Quickstart
+
+* Architecture
+    * System Overview
+    * Storage Engine
+    * RDMA Design
+    * Object Storage Concepts
+
+* Cluster Operations
+    * Cluster Configuration
+    * Cluster Startup
+    * Monitoring
+    * Troubleshooting
+
+* CLI Reference
+    * Cluster Commands
+    * Configuration Commands
+    * Status Commands
+
+* Contributing
+    * Development Environment
+    * Coding Standards
+    * Documentation Guidelines
+
+Future Expansion
+----------------
+
+Additional sections may later include benchmarking,
+performance tuning, deployment guides, and API references.
