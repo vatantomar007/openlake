@@ -17,12 +17,12 @@ a configuration file.
 
 .. note::
 
-The `cluster up` command is intended primarily for local single-node
-development and testing workflows.
+   The ``cluster up`` command is intended primarily for local single-node
+   development and testing workflows.
 
 .. code-block:: bash
 
-openlake cluster up --config openlake.toml
+   openlake cluster up --config openlake.toml
 
 Checking Cluster Status
 =======================
@@ -32,14 +32,14 @@ reachable.
 
 .. code-block:: bash
 
-openlake cluster status --config openlake.toml
+    openlake cluster status --config openlake.toml
 
 Example output:
 
 .. code-block:: text
 
-[node   0] up    127.0.0.1:9000
-[node   1] DOWN  127.0.0.1:9001
+   [node   0] up    127.0.0.1:9000
+   [node   1] DOWN  127.0.0.1:9001
 
 openlake cluster status: 1 / 2 nodes alive
 
@@ -51,7 +51,7 @@ in the configuration file.
 
 .. code-block:: bash
 
-openlake cluster topology --config openlake.toml
+    openlake cluster topology --config openlake.toml
 
 The output includes:
 
@@ -69,9 +69,9 @@ configured node and reports whether the node is currently reachable.
 
 .. code-block:: bash
 
-openlake cluster topology 
---config openlake.toml 
---probe
+    openlake cluster topology 
+    --config openlake.toml 
+    --probe
 
 This adds a status column indicating whether each node is reachable.
 
