@@ -544,7 +544,7 @@ pub async fn put_object(
     body: Body,
 ) -> Result<Response, AppError> {
     if let Some(copy_source) = headers.get("x-amz-copy-source").cloned() {
-        return copy_object(state, bucket, key, copy_source).await;
+        return copy_object(state, bucket, key, copy_source, headers).await;
     }
     match (query.part_number, query.upload_id.as_deref()) {
         (Some(n), Some(uid)) => {
@@ -615,7 +615,15 @@ fn parse_copy_source(value: &HeaderValue) -> Result<(String, String), AppError> 
         .map_err(|_| AppError::Malformed("x-amz-copy-source must be ASCII"))?;
 
     let raw = raw.trim_start_matches('/');
-    let decoded = raw.to_owned();
+    let decoded = percent_encoding::percent_decode_str(raw)
+        .decode_utf8()
+        .map_err(|_| AppError::Malformed("x-amz-copy-source must be valid UTF-8"))?;
+
+    if decoded.contains("?versionId=") {
+        return Err(AppError::NotImplemented(
+            "CopyObject with versionId is not supported",
+        ));
+    }
 
     let (bucket, key) = decoded
         .split_once('/')
@@ -633,9 +641,29 @@ fn copy_object(
     dst_bucket: String,
     dst_key: String,
     copy_source: HeaderValue,
+    headers: HeaderMap,
 ) -> SendWrapper<impl std::future::Future<Output = Result<Response, AppError>>> {
     SendWrapper::new(async move {
         let (src_bucket, src_key) = parse_copy_source(&copy_source)?;
+        if headers
+            .get("x-amz-metadata-directive")
+            .and_then(|v| v.to_str().ok())
+            .is_some_and(|v| !v.eq_ignore_ascii_case("COPY"))
+        {
+            return Err(AppError::NotImplemented(
+                "CopyObject metadata replacement is not supported",
+            ));
+        }
+
+        if headers
+            .get("x-amz-tagging-directive")
+            .and_then(|v| v.to_str().ok())
+            .is_some_and(|v| !v.eq_ignore_ascii_case("COPY"))
+        {
+            return Err(AppError::NotImplemented(
+                "CopyObject tagging replacement is not supported",
+            ));
+        }
         let engine = state.engine().clone();
 
         let (src_info, mut src_stream) = engine.get(&src_bucket, &src_key).await?;
@@ -930,4 +958,41 @@ fn http_date_rfc1123(ms: u64) -> String {
     let dt = OffsetDateTime::from_unix_timestamp(secs).unwrap_or(OffsetDateTime::UNIX_EPOCH);
     dt.format(&FMT)
         .unwrap_or_else(|_| "Thu, 01 Jan 1970 00:00:00 GMT".into())
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::http::HeaderValue;
+
+    #[test]
+    fn parse_copy_source_accepts_bucket_and_key() {
+        let header = HeaderValue::from_static("/bucket/path/to/object.parquet");
+        let (bucket, key) = parse_copy_source(&header).unwrap();
+
+        assert_eq!(bucket, "bucket");
+        assert_eq!(key, "path/to/object.parquet");
+    }
+
+    #[test]
+    fn parse_copy_source_decodes_percent_encoded_key() {
+        let header = HeaderValue::from_static("/bucket/path%20with%20spaces/file.parquet");
+        let (bucket, key) = parse_copy_source(&header).unwrap();
+
+        assert_eq!(bucket, "bucket");
+        assert_eq!(key, "path with spaces/file.parquet");
+    }
+
+    #[test]
+    fn parse_copy_source_rejects_missing_key() {
+        let header = HeaderValue::from_static("/bucket");
+
+        assert!(parse_copy_source(&header).is_err());
+    }
+
+    #[test]
+    fn parse_copy_source_rejects_version_id() {
+        let header = HeaderValue::from_static("/bucket/path/file.parquet?versionId=abc123");
+
+        assert!(parse_copy_source(&header).is_err());
+    }
 }
