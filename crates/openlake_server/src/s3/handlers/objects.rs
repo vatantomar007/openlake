@@ -654,7 +654,8 @@ fn copy_object(
         let engine = state.engine().clone();
 
         let (src_info, mut src_stream) = engine.get(&src_bucket, &src_key).await?;
-        // Todo: Support other x-amz-meta-* in future. Copy with replace only supports content type today.
+        // TODO(v0.6): Support replacement of additional x-amz-meta-* headers.
+// Currently, CopyObject metadata replacement only propagates Content-Type.
         let content_type = if replace_metadata {
             headers
                 .get(CONTENT_TYPE)
