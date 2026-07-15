@@ -637,15 +637,10 @@ fn copy_object(
 ) -> SendWrapper<impl std::future::Future<Output = Result<Response, AppError>>> {
     SendWrapper::new(async move {
         let (src_bucket, src_key) = parse_copy_source(&copy_source)?;
-        if headers
+        let replace_metadata = headers
             .get("x-amz-metadata-directive")
-            .and_then(|v| v.to_str().ok())
-            .is_some_and(|v| !v.eq_ignore_ascii_case("COPY"))
-        {
-            return Err(AppError::NotImplemented(
-                "CopyObject metadata replacement is not supported",
-            ));
-        }
+            .and_then(|value| value.to_str().ok())
+            .is_some_and(|value| value.eq_ignore_ascii_case("REPLACE"));
 
         if headers
             .get("x-amz-tagging-directive")
@@ -659,7 +654,16 @@ fn copy_object(
         let engine = state.engine().clone();
 
         let (src_info, mut src_stream) = engine.get(&src_bucket, &src_key).await?;
-        let content_type = src_info.content_type.clone();
+        // TODO(v0.6): Support replacement of additional x-amz-meta-* headers.
+        // Currently, CopyObject metadata replacement only propagates Content-Type.
+        let content_type = if replace_metadata {
+            headers
+                .get(CONTENT_TYPE)
+                .and_then(|value| value.to_str().ok())
+                .map(str::to_owned)
+        } else {
+            src_info.content_type.clone()
+        };
 
         let dst_info = engine
             .put(
