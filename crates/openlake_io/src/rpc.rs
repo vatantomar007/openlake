@@ -223,7 +223,18 @@ pub enum Request {
     /// `(runtime_id, dct_num, gid, dc_key)`. Until every runtime on
     /// this node has published, `complete = false` and peers retry.
     GetRdmaEndpoints,
+
+    RdmaAttach {
+        client_node_id: u16,
+        epoch: u64,
+        endpoints: Vec<LocalRdmaEndpoint>,
+        slot_bytes: u32,
+    },
 }
+
+pub const CLIENT_NODE_ID_BASE: u16 = 2_048;
+
+pub const CLIENT_NODE_ID_MAX: u16 = 0xFFF;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Response {
@@ -246,6 +257,8 @@ pub enum Response {
     LockRefreshed,
     LockNotFound,
     RdmaEndpoints(RdmaEndpointsReply),
+    RdmaAttached(RdmaEndpointsReply),
+    RdmaAttachDenied(String),
     Err(WireError),
 }
 
